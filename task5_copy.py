@@ -14,6 +14,12 @@ def train_model_return_scores(train_df_path, test_df_path) -> pd.DataFrame:
     train_df = pd.read_csv(train_df_path)
     test_df = pd.read_csv(test_df_path)
 
+    # Create a True Y for testing from test_df
+    # y_test = test_df['class']
+
+    # Drop class(Target) if present
+    # test_df = test_df.drop(columns=['class'], axis=1, errors='ignore')
+
     # Split Train to x_train and y_train
     x_train = train_df.drop(columns=['class'])
     y_train = train_df['class']
@@ -36,9 +42,12 @@ def train_model_return_scores(train_df_path, test_df_path) -> pd.DataFrame:
     x_train_nona = x_train_scaled_df.dropna(axis=1)
     test_nona = test_scaled_df.dropna(axis=1)
     # Generate Model
-    model = LogisticRegression()
+    model = LogisticRegression(penalty='l2', solver='newton-cholesky')
     # Fit Model to Training Data
     model.fit(x_train_nona, y_train)
+    # Only needed for Metrics calculation
+    # y_pred = model.predict(test_nona)
+
     # Perform prediction on test data
     y_prob = model.predict_proba(test_nona)[:, 1]
 
@@ -47,3 +56,10 @@ def train_model_return_scores(train_df_path, test_df_path) -> pd.DataFrame:
     # malware_score : this should be your model's output for the row in the test df
     test_scores = pd.DataFrame({'index': test_df.index, 'malware_score': y_prob})
     return test_scores
+
+# Metrics calculation
+    # acc = accuracy_score(y_test, y_pred)
+    # rec = recall_score(y_test, y_pred)
+    # prec = precision_score(y_test, y_pred)
+    # f1 = f1_score(y_test, y_pred)
+    # auc = roc_auc_score(y_test, y_prob)
